@@ -5,9 +5,8 @@ import { transactionTotals } from '../domain/calc';
 import { exportTransactionsPdf, exportTransactionsXlsx } from '../domain/export';
 import { filterTransactions, type HistoryFilters, type PaymentFilter, type TimePeriod } from '../domain/filters';
 import { formatDate, formatVnd, formatWeight } from '../domain/format';
-import { CROPS, type CropType } from '../domain/types';
 import { TransactionCropIcon, TransactionCrops } from '../components/TransactionCrops';
-import { CropIcon } from '../components/CropIcon';
+import { ProductIcon } from '../components/CropIcon';
 import { SearchIcon } from '../components/icons';
 
 const TIME_OPTIONS: { id: TimePeriod; label: string }[] = [
@@ -33,7 +32,7 @@ export function HistoryPage() {
   const [query, setQuery] = useState('');
   const [period, setPeriod] = useState<TimePeriod>('all');
   const [payment, setPayment] = useState<PaymentFilter>('all');
-  const [crop, setCrop] = useState<CropType | 'all'>('all');
+  const [product, setProduct] = useState('all');
   const [customFrom, setCustomFrom] = useState('');
   const [customTo, setCustomTo] = useState('');
   const [showCropFilter, setShowCropFilter] = useState(false);
@@ -45,14 +44,22 @@ export function HistoryPage() {
     customTo: customTo || undefined,
     payment,
     supplierId: supplierIdParam,
-    crop: crop === 'all' ? undefined : crop,
+    crop: product === 'all' ? undefined : product,
     query,
   };
 
-  const results = useMemo(
-    () => filterTransactions(data.transactions, filters),
-    [data.transactions, period, payment, crop, supplierIdParam, query, customFrom, customTo],
-  );
+  const results = filterTransactions(data.transactions, filters);
+
+  const productOptions = useMemo(() => {
+    const fromTx = data.transactions.flatMap((t) =>
+      t.lines.map((l) => ({ name: l.productName, crop: l.crop })),
+    );
+    return [
+      ...new Map(
+        [...data.products.filter((p) => p.isActive), ...fromTx].map((p) => [p.name, p]),
+      ).values(),
+    ];
+  }, [data.products, data.transactions]);
 
   const supplierName = supplierIdParam
     ? data.suppliers.find((s) => s.id === supplierIdParam)?.name ??
@@ -65,14 +72,14 @@ export function HistoryPage() {
   const hasActiveFilters =
     period !== 'all' ||
     payment !== 'all' ||
-    crop !== 'all' ||
+    product !== 'all' ||
     query.trim() !== '' ||
     Boolean(supplierIdParam);
 
   const resetFilters = () => {
     setPeriod('all');
     setPayment('all');
-    setCrop('all');
+    setProduct('all');
     setCustomFrom('');
     setCustomTo('');
     setQuery('');
@@ -206,12 +213,12 @@ export function HistoryPage() {
           </button>
           {showCropFilter && (
             <div className="mt-2 flex flex-wrap gap-2">
-              <Chip active={crop === 'all'} onClick={() => setCrop('all')}>
+              <Chip active={product === 'all'} onClick={() => setProduct('all')}>
                 Tất cả
               </Chip>
-              {CROPS.map((c) => (
-                <Chip key={c.id} active={crop === c.id} onClick={() => setCrop(c.id)}>
-                  <CropIcon crop={c.id} className="text-base" /> {c.label}
+              {productOptions.map((p) => (
+                <Chip key={p.name} active={product === p.name} onClick={() => setProduct(p.name)}>
+                  <ProductIcon crop={p.crop} name={p.name} className="text-base" /> {p.name}
                 </Chip>
               ))}
             </div>

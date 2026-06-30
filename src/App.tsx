@@ -9,6 +9,9 @@ import { HistoryPage } from './pages/HistoryPage';
 import { ReceiptDetailPage } from './pages/ReceiptDetailPage';
 import { DebtPage } from './pages/DebtPage';
 import { SuppliersPage } from './pages/SuppliersPage';
+import { DraftsPage } from './pages/DraftsPage';
+import { ProductsPage } from './pages/ProductsPage';
+import { UtilitiesPage } from './pages/UtilitiesPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ForgotPasswordPage, LoginPage, RegisterPage } from './pages/AuthPages';
 
@@ -31,10 +34,13 @@ export default function App() {
           >
             <Route index element={<DashboardPage />} />
             <Route path="new" element={<NewReceiptPage />} />
+            <Route path="drafts" element={<DraftsPage />} />
             <Route path="history" element={<HistoryPage />} />
             <Route path="receipt/:id" element={<ReceiptDetailPage />} />
             <Route path="debts" element={<DebtPage />} />
             <Route path="suppliers" element={<SuppliersPage />} />
+            <Route path="products" element={<ProductsPage />} />
+            <Route path="utilities" element={<UtilitiesPage />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
         </Routes>

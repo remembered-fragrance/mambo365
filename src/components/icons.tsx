@@ -76,3 +76,26 @@ export const UserIcon = ({ className }: IconProps) => (
     <path d="M4 20a8 8 0 0 1 16 0" />
   </svg>
 );
+
+export const QueueIcon = ({ className }: IconProps) => (
+  <svg className={base(className)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M4 6h16" />
+    <path d="M4 12h16" />
+    <path d="M4 18h10" />
+    <path d="M18 16v4M16 18h4" />
+  </svg>
+);
+
+export const BoxIcon = ({ className }: IconProps) => (
+  <svg className={base(className)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 8 12 3 3 8l9 5 9-5Z" />
+    <path d="M3 8v8l9 5 9-5V8" />
+    <path d="M12 13v8" />
+  </svg>
+);
+
+export const ToolIcon = ({ className }: IconProps) => (
+  <svg className={base(className)} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14.7 6.3a4 4 0 0 0-5 5L3 18v3h3l6.7-6.7a4 4 0 0 0 5-5l-2.5 2.5-2-2 2.5-2.5Z" />
+  </svg>
+);

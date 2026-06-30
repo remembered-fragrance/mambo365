@@ -1,6 +1,6 @@
 import html2canvas from 'html2canvas';
 import { lineTotals, transactionTotals } from './calc';
-import { formatDateTime, formatVnd, formatWeight } from './format';
+import { formatDateTime, formatQuantity, formatVnd } from './format';
 import { cropMeta, type Transaction } from './types';
 
 const el = (
@@ -19,23 +19,23 @@ const el = (
 const row = (label: string, value: string, strong = false): HTMLElement =>
   el(
     'div',
-    'display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:4px 0;',
+    'display:flex;justify-content:space-between;align-items:center;font-size:13px;margin:4px 0;gap:12px;',
     [
       el('span', 'color:#64748b;', [label]),
-      el('span', strong ? 'color:#0f172a;font-weight:600;' : 'color:#334155;', [value]),
+      el('span', strong ? 'color:#0f172a;font-weight:600;text-align:right;' : 'color:#334155;text-align:right;', [value]),
     ],
   );
 
 const divider = (): HTMLElement =>
   el('div', 'border-top:1px dashed #e2e8f0;margin:12px 0;');
 
-const cropLabel = (crop: string): string => {
-  const meta = cropMeta(crop as Parameters<typeof cropMeta>[0]);
-  const icon = meta.emoji || (crop === 'pepper' ? '●' : '');
-  return `${icon} ${meta.label}`.trim();
+const productLabel = (name: string, crop?: Parameters<typeof cropMeta>[0]): string => {
+  const meta = cropMeta(crop);
+  const icon = meta?.emoji || (crop === 'pepper' ? '●' : '');
+  return `${icon} ${name}`.trim();
 };
 
-/** DOM phiếu chỉ dùng inline hex — không Tailwind, không oklch. */
+/** DOM phiếu chỉ dùng inline hex - không Tailwind, không oklch. */
 export const buildReceiptExportElement = (tx: Transaction): HTMLElement => {
   const { netWeight, total, debt } = transactionTotals(tx);
 
@@ -73,27 +73,33 @@ export const buildReceiptExportElement = (tx: Transaction): HTMLElement => {
       'background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:8px;',
     );
     const title = el('div', 'font-weight:600;color:#1e293b;font-size:13px;margin-bottom:8px;', [
-      cropLabel(line.crop) + (tx.lines.length > 1 ? ` #${i + 1}` : ''),
+      productLabel(line.productName, line.crop) + (tx.lines.length > 1 ? ` #${i + 1}` : ''),
     ]);
     block.appendChild(title);
-    block.appendChild(row('KL cân', formatWeight(line.grossWeight)));
-    block.appendChild(row('KL bì', formatWeight(line.tareWeight)));
-    block.appendChild(row('KL sản phẩm', formatWeight(lt.netWeight)));
-    block.appendChild(row('Đơn giá', `${formatVnd(line.pricePerKg)}/kg`));
+    block.appendChild(row('KL/SL cân', formatQuantity(line.grossWeight, line.unit)));
+    if (line.formulaType === 'netAfterTare') {
+      block.appendChild(row('KL bì/trừ', formatQuantity(line.tareWeight ?? 0, line.unit)));
+    }
+    if (line.formulaType === 'rubberLatex') {
+      block.appendChild(row('Hàm lượng mủ', `${line.qualityPercent ?? 0}%`));
+    }
+    block.appendChild(row('KL/SL tính tiền', formatQuantity(lt.netWeight, line.unit)));
+    block.appendChild(row('Đơn giá', `${formatVnd(line.pricePerUnit)}/${line.unit}`));
+    block.appendChild(row('Tạm tính', formatVnd(lt.rawTotal)));
     block.appendChild(row('Thành tiền', formatVnd(lt.total), true));
     body.appendChild(block);
   });
 
   body.appendChild(divider());
-  body.appendChild(row('Tổng khối lượng', formatWeight(netWeight)));
+  body.appendChild(row('Tổng KL/SL tính tiền', formatQuantity(netWeight)));
 
   const totalRow = el(
     'div',
-    'display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0;',
+    'display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0;gap:12px;',
   );
   totalRow.appendChild(el('span', 'color:#475569;font-weight:500;font-size:13px;', ['Tổng thành tiền']));
   totalRow.appendChild(
-    el('span', 'color:#15803d;font-size:24px;font-weight:800;', [formatVnd(total)]),
+    el('span', 'color:#15803d;font-size:24px;font-weight:800;text-align:right;', [formatVnd(total)]),
   );
   body.appendChild(totalRow);
   body.appendChild(row('Đã thanh toán', formatVnd(tx.amountPaid)));
@@ -128,7 +134,7 @@ const waitImages = async (root: HTMLElement): Promise<void> => {
   );
 };
 
-/** Capture trong iframe trống — html2canvas không đọc stylesheet Tailwind oklch. */
+/** Capture trong iframe trống - html2canvas không đọc stylesheet Tailwind oklch. */
 export const captureInIsolatedFrame = async (element: HTMLElement): Promise<HTMLCanvasElement> => {
   const iframe = document.createElement('iframe');
   iframe.setAttribute('aria-hidden', 'true');

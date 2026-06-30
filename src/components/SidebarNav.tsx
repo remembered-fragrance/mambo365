@@ -1,16 +1,20 @@
 import { NavLink } from 'react-router-dom';
+import { useStore } from '../data/useStore';
 import { AppLogo } from './CropIcon';
 import { NAV_ITEMS } from './navItems';
 import { PlusIcon } from './icons';
 
 export function SidebarNav() {
+  const { data } = useStore();
+  const badge = (kind?: 'drafts') => (kind === 'drafts' && data.drafts.length ? data.drafts.length : 0);
+
   return (
     <aside className="no-print hidden lg:flex lg:w-64 lg:shrink-0 lg:flex-col lg:border-r lg:border-slate-200 lg:bg-white">
       <div className="flex h-16 items-center gap-2 border-b border-slate-100 px-5">
         <AppLogo className="h-9" />
       </div>
       <nav className="flex flex-1 flex-col gap-1 p-3">
-        {NAV_ITEMS.filter((i) => !i.primary).map(({ to, label, Icon, end }) => (
+        {NAV_ITEMS.filter((i) => !i.primary).map(({ to, label, Icon, end, badge: badgeKind }) => (
           <NavLink
             key={to}
             to={to}
@@ -24,7 +28,12 @@ export function SidebarNav() {
             }
           >
             <Icon className="h-5 w-5" />
-            {label}
+            <span className="flex-1">{label}</span>
+            {badge(badgeKind) > 0 && (
+              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700">
+                {badge(badgeKind)}
+              </span>
+            )}
           </NavLink>
         ))}
         <NavLink

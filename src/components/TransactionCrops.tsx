@@ -1,20 +1,26 @@
-import { transactionCrops } from '../domain/calc';
 import type { CropType, Transaction } from '../domain/types';
 import { CropBadge } from './CropBadge';
-import { CropIcon } from './CropIcon';
+import { ProductIcon } from './CropIcon';
 
 export function TransactionCrops({ transaction }: { transaction: Transaction }) {
-  const crops = transactionCrops(transaction) as CropType[];
+  const products = [
+    ...new Map(
+      transaction.lines.map((line) => [
+        line.productName,
+        { name: line.productName || 'Mặt hàng', crop: line.crop },
+      ]),
+    ).values(),
+  ];
   return (
     <div className="flex flex-wrap gap-1">
-      {crops.map((c) => (
-        <CropBadge key={c} crop={c} />
+      {products.map((p) => (
+        <CropBadge key={p.name} crop={p.crop as CropType | undefined} name={p.name} />
       ))}
     </div>
   );
 }
 
 export function TransactionCropIcon({ transaction, className }: { transaction: Transaction; className?: string }) {
-  const crop = transaction.lines[0]?.crop ?? 'rubber';
-  return <CropIcon crop={crop} className={className} />;
+  const line = transaction.lines[0];
+  return <ProductIcon crop={line?.crop} name={line?.productName ?? 'Mặt hàng'} className={className} />;
 }

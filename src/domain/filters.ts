@@ -63,14 +63,18 @@ export const filterTransactions = (
     const ms = new Date(t.date).getTime();
     if (range && (ms < range.from || ms > range.to)) return false;
     if (filters.supplierId && t.supplierId !== filters.supplierId) return false;
-    if (filters.crop && filters.crop !== 'all' && !t.lines.some((l) => l.crop === filters.crop)) {
+    if (
+      filters.crop &&
+      filters.crop !== 'all' &&
+      !t.lines.some((l) => l.productName === filters.crop || l.crop === filters.crop)
+    ) {
       return false;
     }
     const { debt } = transactionTotals(t);
     if (filters.payment === 'paid' && debt > 0) return false;
     if (filters.payment === 'unpaid' && debt <= 0) return false;
     if (q) {
-      const cropLabels = t.lines.map((l) => l.crop).join(' ');
+      const cropLabels = t.lines.map((l) => l.productName).join(' ');
       const hay = `${t.supplierName} ${cropLabels} ${t.note ?? ''}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }

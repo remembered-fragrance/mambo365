@@ -85,15 +85,15 @@ export function DashboardPage() {
             {byCrop.map((c) => {
               const pct = (c.spent / month.spent) * 100 || 0;
               return (
-                <div key={c.crop}>
+                <div key={c.productName}>
                   <div className="mb-1 flex items-center justify-between text-sm">
-                    <CropBadge crop={c.crop} />
+                    <CropBadge crop={c.crop} name={c.productName} />
                     <span className="font-medium text-slate-700">{formatVnd(c.spent)}</span>
                   </div>
                   <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
                     <div
                       className="h-full rounded-full"
-                      style={{ width: `${pct}%`, backgroundColor: barColor(c.crop) }}
+                      style={{ width: `${pct}%`, backgroundColor: barColor(c.crop ?? c.productName) }}
                     />
                   </div>
                 </div>

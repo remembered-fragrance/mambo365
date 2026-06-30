@@ -5,7 +5,7 @@ interface CropIconProps {
   readonly className?: string;
 }
 
-/** Hồ tiêu dùng icon hạt tiêu (không dùng 🌶️ trái ớt). */
+/** Hồ tiêu dùng icon hạt tiêu (không dùng emoji trái ớt). */
 export function CropIcon({ crop, className = 'text-lg' }: CropIconProps) {
   if (crop === 'pepper') {
     return (
@@ -20,7 +20,27 @@ export function CropIcon({ crop, className = 'text-lg' }: CropIconProps) {
   }
   return (
     <span className={className} aria-hidden>
-      {cropMeta(crop).emoji}
+      {cropMeta(crop)?.emoji}
+    </span>
+  );
+}
+
+export function ProductIcon({
+  crop,
+  name,
+  className = 'text-lg',
+}: {
+  readonly crop?: CropType;
+  readonly name: string;
+  readonly className?: string;
+}) {
+  if (crop) return <CropIcon crop={crop} className={className} />;
+  return (
+    <span
+      aria-hidden
+      className={`inline-flex h-[1.8em] w-[1.8em] items-center justify-center rounded-full bg-slate-100 text-[0.72em] font-bold text-slate-600 ${className}`}
+    >
+      {name.trim().charAt(0).toUpperCase() || 'M'}
     </span>
   );
 }

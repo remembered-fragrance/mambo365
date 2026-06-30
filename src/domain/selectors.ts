@@ -29,22 +29,25 @@ export const summaryFor = (data: AppData, period: 'today' | 'week' | 'month'): P
   return summarize(data.transactions.filter((t) => new Date(t.date).getTime() >= since));
 };
 
-export interface CropBreakdown {
-  readonly crop: CropType;
+export interface ProductBreakdown {
+  readonly productName: string;
+  readonly crop?: CropType;
   readonly spent: number;
   readonly weight: number;
 }
 
-export const spentByCrop = (data: AppData, period: 'week' | 'month'): CropBreakdown[] => {
+export const spentByCrop = (data: AppData, period: 'week' | 'month'): ProductBreakdown[] => {
   const since = period === 'week' ? daysAgoMs(6) : daysAgoMs(29);
-  const map = new Map<CropType, CropBreakdown>();
+  const map = new Map<string, ProductBreakdown>();
   for (const t of data.transactions) {
     if (new Date(t.date).getTime() < since) continue;
     for (const line of t.lines) {
       const lt = lineTotals(line);
-      const cur = map.get(line.crop) ?? { crop: line.crop, spent: 0, weight: 0 };
-      map.set(line.crop, {
-        crop: line.crop,
+      const name = line.productName || 'Mặt hàng';
+      const cur = map.get(name) ?? { productName: name, crop: line.crop, spent: 0, weight: 0 };
+      map.set(name, {
+        productName: name,
+        crop: cur.crop ?? line.crop,
         spent: cur.spent + lt.total,
         weight: cur.weight + lt.netWeight,
       });

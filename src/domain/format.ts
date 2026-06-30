@@ -10,7 +10,10 @@ export const formatVndShort = (n: number): string => {
   return vnd.format(n);
 };
 
-export const formatWeight = (kg: number): string => `${vnd.format(round(kg, 2))} kg`;
+export const formatQuantity = (value: number, unit = 'kg'): string =>
+  `${vnd.format(round(value, 2))} ${unit}`;
+
+export const formatWeight = (kg: number): string => formatQuantity(kg, 'kg');
 
 export const formatDate = (iso: string): string =>
   new Date(iso).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });

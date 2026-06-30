@@ -4,10 +4,9 @@ import type { ReactNode } from 'react';
 import { useStore } from '../data/useStore';
 import { lineTotals, transactionTotals } from '../domain/calc';
 import { receiptShareText } from '../domain/export';
-import { formatDateTime, formatVnd, formatWeight } from '../domain/format';
-import { cropMeta } from '../domain/types';
+import { formatDateTime, formatQuantity, formatVnd, formatWeight } from '../domain/format';
 import { downloadReceiptPdf, downloadReceiptPng, shareReceiptPdf, shareReceiptPng } from '../domain/receiptExport';
-import { AppLogo, CropIcon } from '../components/CropIcon';
+import { AppLogo, ProductIcon } from '../components/CropIcon';
 import { BackIcon } from '../components/icons';
 
 export function ReceiptDetailPage() {
@@ -114,21 +113,26 @@ export function ReceiptDetailPage() {
           <div className="my-2 border-t border-dashed border-slate-200" />
 
           {tx.lines.map((line, i) => {
-            const meta = cropMeta(line.crop);
             const lt = lineTotals(line);
             return (
               <div key={line.id} data-receipt-line className="rounded-xl bg-slate-50 p-3">
                 <div className="mb-2 flex items-center gap-2 font-medium text-slate-800">
-                  <CropIcon crop={line.crop} className="text-base" />
-                  {meta.label}
+                  <ProductIcon crop={line.crop} name={line.productName} className="text-base" />
+                  {line.productName}
                   {tx.lines.length > 1 && (
                     <span className="text-xs text-slate-400">#{i + 1}</span>
                   )}
                 </div>
-                <Row label="KL cân" value={formatWeight(line.grossWeight)} />
-                <Row label="KL bì" value={formatWeight(line.tareWeight)} />
-                <Row label="KL sản phẩm" value={formatWeight(lt.netWeight)} />
-                <Row label="Đơn giá" value={`${formatVnd(line.pricePerKg)}/kg`} />
+                <Row label="KL/SL cân" value={formatQuantity(line.grossWeight, line.unit)} />
+                {line.formulaType === 'netAfterTare' && (
+                  <Row label="KL bì/trừ" value={formatQuantity(line.tareWeight ?? 0, line.unit)} />
+                )}
+                {line.formulaType === 'rubberLatex' && (
+                  <Row label="Hàm lượng mủ" value={`${line.qualityPercent ?? 0}%`} />
+                )}
+                <Row label="KL/SL tính tiền" value={formatQuantity(lt.netWeight, line.unit)} />
+                <Row label="Đơn giá" value={`${formatVnd(line.pricePerUnit)}/${line.unit}`} />
+                <Row label="Tạm tính" value={formatVnd(lt.rawTotal)} />
                 <Row label="Thành tiền" value={formatVnd(lt.total)} strong />
               </div>
             );
